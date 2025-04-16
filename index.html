@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adashe Contribution UI</title>
+  <link rel="stylesheet" href="./script.css">
+</head>
+<body>
+
+  <h1> Adashe Contribution Club</h1>
+
+  <!-- Form to add a new member -->
+  <div class="form-container">
+    <input id="memberName" type="text" placeholder="Enter name" />
+    <input id="contributionAmount" type="number" placeholder="Amount" />
+    <button onclick="handleAddMember()">Add / Update</button>
+  </div>
+
+  <!-- Contribution List -->
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th class="text-right">Amount (₦)</th>
+      </tr>
+    </thead>
+    <tbody id="memberList"></tbody>
+  </table>
+
+ 
+  <script src="./script.js"></script>
+</body>
+</html>
