@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adashe Contribution Club</title>
+  <style>
+    body {
+      background-color: #c2dcf7;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: blue;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-container input, .form-container button {
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 1.5rem;
+    }
+
+    .form-container button {
+      background-color: gray;
+      color: white;
+      cursor: pointer;
+    }
+
+    .form-container button:hover {
+      background-color: #4b5563;
+    }
+
+    table {
+      width: 100%;
+      max-width: 600px;
+      background: white;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+    }
+
+    thead {
+      background-color: #dbeafe;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f3f4f6;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-green {
+      color: blue;
+      font-weight: bold;
+    }
+
+    .confirm{
+        margin-bottom: auto;
+              
+    }
+
+    #userInfo {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Adashe Contribution Club</h1>
+
+  <!-- Register/Login Form -->
+  <div class="form-container" id="authSection">
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="registerUser()">New Register</button>
+    <!-- <p class="confirm">Already Registered? </p> -->
+    <button onclick="loginUser()">Login</button>
+  </div>
+
+  <!-- Logged-in User Info -->
+  <div id="userInfo" style="display: none;">
+    <p>Welcome, <span id="loggedInUser"></span>! <button onclick="logoutUser()">Logout</button></p>
+  </div>
+
+  <!-- Form to add new contribution -->
+  <div class="form-container" id="contributionForm" style="display: none;">
+    <input id="memberName" type="text" placeholder="Enter name" />
+    <input id="contributionAmount" type="number" placeholder="Amount" />
+    <button onclick="handleAddMember()">Add / Update</button>
+  </div>
+
+  <!-- Contribution List -->
+  <table id="contributionTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th class="text-right">Amount (₦)</th>
+      </tr>
+    </thead>
+    <tbody id="memberList"></tbody>
+  </table>
+
+  <script>
+    let currentUser = localStorage.getItem("currentUser");
+    let adasheContribution = [];
+
+    function registerUser() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) {
+        alert("Please enter both username and password.");
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+      if (users[username]) {
+        alert("Username already exists.");
+        return;
+      }
+
+      users[username] = { password };
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("Registration successful. Please log in.");
+    }
+
+    function loginUser() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+      if (users[username] && users[username].password === password) {
+        currentUser = username;
+        localStorage.setItem("currentUser", currentUser);
+        alert("Login successful!");
+        loadContributions();
+        updateAuthUI();
+      } else {
+        alert("Invalid username or password.");
+      }
+    }
+
+    function logoutUser() {
+      localStorage.removeItem("currentUser");
+      currentUser = null;
+      adasheContribution = [];
+      updateAuthUI();
+    }
+
+    function updateAuthUI() {
+      const authSection = document.getElementById("authSection");
+      const userInfo = document.getElementById("userInfo");
+      const form = document.getElementById("contributionForm");
+      const table = document.getElementById("contributionTable");
+      const list = document.getElementById("memberList");
+
+      if (currentUser) {
+        document.getElementById("loggedInUser").textContent = currentUser;
+        authSection.style.display = "none";
+        userInfo.style.display = "block";
+        form.style.display = "flex";
+        table.style.display = "table";
+        renderMembers();
+      } else {
+        authSection.style.display = "flex";
+        userInfo.style.display = "none";
+        form.style.display = "none";
+        table.style.display = "none";
+        list.innerHTML = "";
+      }
+    }
+
+    function addNewMember(name, amount) {
+      let memberExists = false;
+
+      for (let i = 0; i < adasheContribution.length; i++) {
+        if (adasheContribution[i].name.toLowerCase() === name.toLowerCase()) {
+          adasheContribution[i].amount += amount;
+          memberExists = true;
+          break;
+        }
+      }
+
+      if (!memberExists) {
+        adasheContribution.push({ name, amount });
+      }
+
+      saveContributions();
+    }
+
+    function handleAddMember() {
+      const nameInput = document.getElementById("memberName");
+      const amountInput = document.getElementById("contributionAmount");
+      const name = nameInput.value.trim();
+      const amount = parseFloat(amountInput.value);
+
+      if (name && amount > 0) {
+        addNewMember(name, amount);
+        nameInput.value = "";
+        amountInput.value = "";
+        renderMembers();
+      }
+    }
+
+    function renderMembers() {
+      const list = document.getElementById("memberList");
+      list.innerHTML = "";
+
+      adasheContribution.forEach(member => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="capitalize">${member.name}</td>
+          <td class="text-right text-green">${member.amount.toLocaleString()}</td>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function saveContributions() {
+      if (currentUser) {
+        localStorage.setItem("adashe_" + currentUser, JSON.stringify(adasheContribution));
+      }
+    }
+
+    function loadContributions() {
+      if (currentUser) {
+        adasheContribution = JSON.parse(localStorage.getItem("adashe_" + currentUser) || "[]");
+      }
+    }
+
+    // Load on startup
+    if (currentUser) {
+      loadContributions();
+    }
+    updateAuthUI();
+  </script>
+</body>
+</html>
