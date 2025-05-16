@@ -35,13 +35,11 @@ let adasheContribution = [];
         const row = document.createElement("tr");
         row.innerHTML = `
           <td class="capitalize">${member.name}</td>
-          <td class="text-right text-green">₦${member.amount.toLocaleString()}</td>
+          <td class="text-right text-green">${member.amount.toLocaleString()}</td>
         `;
         list.appendChild(row);
       });
     }
-
-    // Sample Data
     [
       ["Promise", 2000], ["Josephine", 5000], ["Dan", 100],
       ["Josiah", 3000], ["Maria", 2000], ["Yakubu", 1200],
